@@ -5,4 +5,8 @@ export default {
     extend: {},
   },
   plugins: [],
+  darkMode: "class", // This is crucial!
+  theme: {
+    extend: {},
+  },
 };

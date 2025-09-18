@@ -1,8 +1,8 @@
-import "./Recommended.css";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { API_KEY } from "../../data";
-import { useEffect, useState } from "react";
 
+// Recommended Component
 const Recommended = ({ categoryId, videoId, searchQuery }) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -96,44 +96,72 @@ const Recommended = ({ categoryId, videoId, searchQuery }) => {
   };
 
   if (loading) {
-    return <div className="recommended">Loading recommendations...</div>;
+    return (
+      <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex animate-pulse">
+            <div className="bg-gray-200 dark:bg-gray-700 w-40 h-24 rounded-lg"></div>
+            <div className="ml-3 flex-1">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="recommended error">{error}</div>;
+    return (
+      <div className="text-red-500 dark:text-red-400 p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
+        {error}
+      </div>
+    );
   }
 
   if (videos.length === 0) {
-    return <div className="recommended">No recommendations available.</div>;
+    return (
+      <div className="text-gray-500 dark:text-gray-400">
+        No recommendations available.
+      </div>
+    );
   }
 
   return (
-    <div className="recommended">
-      <h3 className="recommended-title">
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
         {searchQuery
           ? `Videos related to "${searchQuery}"`
           : "Recommended Videos"}
       </h3>
-      {videos.map((video) => (
-        <Link
-          to={`/video/${video.snippet.categoryId}/${video.id}`}
-          className="side-video-list"
-          key={video.id}
-        >
-          <img
-            src={video.snippet.thumbnails.medium.url}
-            alt={video.snippet.title}
-          />
-          <div className="vid-info">
-            <h4>{video.snippet.title}</h4>
-            <p>{video.snippet.channelTitle}</p>
-            <p>
-              {formatViewCount(video.statistics?.viewCount)} views •{" "}
-              {formatDate(video.snippet.publishedAt)}
-            </p>
-          </div>
-        </Link>
-      ))}
+      <div className="space-y-3">
+        {videos.map((video) => (
+          <Link
+            to={`/video/${video.snippet.categoryId}/${video.id}`}
+            className="flex group"
+            key={video.id}
+          >
+            <img
+              src={video.snippet.thumbnails.medium.url}
+              alt={video.snippet.title}
+              className="w-40 h-24 object-cover rounded-lg"
+            />
+            <div className="ml-3 flex-1">
+              <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2">
+                {video.snippet.title}
+              </h4>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {video.snippet.channelTitle}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {formatViewCount(video.statistics?.viewCount)} views •{" "}
+                {formatDate(video.snippet.publishedAt)}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };

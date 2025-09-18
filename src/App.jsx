@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
+import { useSearchParams, Routes, Route } from "react-router-dom";
+import ThemeProvider from "./components/ThemeProvider";
 import Navbar from "./components/Navbar/Navbar";
-import { Route, Routes, useSearchParams } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import Video from "./pages/video/Video";
-import { useState, useEffect } from "react";
 
+// Main App Component
 const App = () => {
   const [sidebar, setSidebar] = useState(true);
   const [searchResults, setSearchResults] = useState(null);
@@ -36,26 +38,28 @@ const App = () => {
   };
 
   return (
-    <div>
-      <Navbar setSidebar={setSidebar} onSearch={handleSearch} />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              sidebar={sidebar}
-              searchResults={searchResults}
-              setSearchResults={setSearchResults}
-              clearSearch={clearSearch}
-            />
-          }
-        />
-        <Route
-          path="/video/:categoryId/:videoId"
-          element={<Video searchQuery={searchQuery} />}
-        />
-      </Routes>
-    </div>
+    <ThemeProvider>
+      <div className="App">
+        <Navbar setSidebar={setSidebar} onSearch={handleSearch} />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                sidebar={sidebar}
+                searchResults={searchResults}
+                setSearchResults={setSearchResults}
+                clearSearch={clearSearch}
+              />
+            }
+          />
+          <Route
+            path="/video/:categoryId/:videoId"
+            element={<Video searchQuery={searchQuery} />}
+          />
+        </Routes>
+      </div>
+    </ThemeProvider>
   );
 };
 
