@@ -36,7 +36,7 @@ const Home = ({ sidebar, searchResults, setSearchResults, clearSearch }) => {
         setCategory={setCategory}
       />
       <div className={`container ${sidebar ? "" : "large-container"}`}>
-        {isSearching ? (
+        {isSearching && searchResults ? (
           <div className="search-results">
             <h2>Search Results for: "{searchResults.query}"</h2>
             <button onClick={handleClearSearch}>Clear Search</button>

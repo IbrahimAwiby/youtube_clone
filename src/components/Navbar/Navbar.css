@@ -1,3 +1,9 @@
+/* Navbar.css */
+.flex-div {
+  display: flex;
+  align-items: center;
+}
+
 nav {
   padding: 10px 2%;
   justify-content: space-between;
@@ -5,53 +11,69 @@ nav {
   background: #fff;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 101;
+  flex-wrap: wrap;
 }
+
+.nav-left {
+  flex: 1;
+}
+
 .nav-left .menu-icon {
   width: 22px;
   margin-right: 25px;
+  cursor: pointer;
 }
+
 .nav-left .logo {
   width: 130px;
 }
+
+.nav-middle {
+  flex: 2;
+  justify-content: center;
+}
+
 .nav-middle .search-box {
   border: 1px solid #ccc;
-  margin-right: 15px;
   padding: 8px 12px;
   border-radius: 25px;
+  width: 100%;
+  max-width: 500px;
 }
+
 .nav-middle .search-box input {
-  width: 400px;
+  width: 100%;
   border: 0;
   outline: 0;
   background: transparent;
+  flex: 1;
 }
+
 .nav-middle .search-box input::placeholder {
   color: #ccc;
 }
+
 .nav-middle .search-box img {
   width: 20px;
   height: 20px;
 }
-.nav-right img {
-  width: 25px;
-  height: 25px;
-  margin-right: 25px;
+
+.nav-right {
+  flex: 1;
+  justify-content: flex-end;
 }
+
+.nav-right img {
+  margin-right: 20px;
+  cursor: pointer;
+}
+
 .nav-right .user-icon {
   border-radius: 50%;
   width: 35px;
   height: 35px;
-}
-
-.search-results button {
-  background: #ff0000;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-bottom: 20px;
+  margin-right: 0;
 }
 
 .search-box button {
@@ -59,4 +81,70 @@ nav {
   background: transparent;
   cursor: pointer;
   padding: 0;
+  margin-left: 10px;
+}
+
+/* Mobile search icon - hidden by default */
+.mobile-search-icon {
+  display: none;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 900px) {
+  .nav-middle .search-box {
+    max-width: 300px;
+    margin-left: 10px;
+  }
+
+  .nav-right img {
+    margin-right: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-middle {
+    order: 3;
+    width: 100%;
+    display: none;
+  }
+
+  .nav-middle.mobile-search-active {
+    display: flex;
+    margin-top: 10px;
+  }
+
+  .mobile-search-icon {
+    display: block;
+  }
+
+  .nav-right .nav-icon:not(.mobile-search-icon) {
+    display: none;
+  }
+
+  .nav-left {
+    flex: 1;
+  }
+
+  .nav-right {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-left .logo {
+    width: 100px;
+  }
+
+  .nav-left .menu-icon {
+    margin-right: 15px;
+  }
+
+  .nav-right img {
+    margin-right: 10px;
+  }
+
+  .user-icon {
+    width: 30px;
+    height: 30px;
+  }
 }

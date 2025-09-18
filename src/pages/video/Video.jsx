@@ -7,12 +7,16 @@ const Video = ({ searchQuery }) => {
   const { videoId, categoryId } = useParams();
   return (
     <div className="play-container">
-      <PlayVideo videoId={videoId} categoryId={categoryId} />
-      <Recommended
-        categoryId={categoryId}
-        videoId={videoId}
-        searchQuery={searchQuery}
-      />
+      <div className="video-player-container">
+        <PlayVideo videoId={videoId} categoryId={categoryId} />
+      </div>
+      <div className="recommended-container">
+        <Recommended
+          categoryId={categoryId}
+          videoId={videoId}
+          searchQuery={searchQuery}
+        />
+      </div>
     </div>
   );
 };
