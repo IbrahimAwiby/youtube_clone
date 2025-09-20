@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import ThemeProvider from "./components/ThemeProvider";
 import Navbar from "./components/Navbar/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home/Home";
 import Video from "./pages/video/Video";
+import SignIn from "./pages/auth/SignIn";
+import SignUp from "./pages/auth/SignUp";
+import "react-toastify/dist/ReactToastify.css";
 
 // Main App Component
 const App = () => {
@@ -57,7 +62,35 @@ const App = () => {
             path="/video/:categoryId/:videoId"
             element={<Video searchQuery={searchQuery} />}
           />
+          <Route
+            path="/signin"
+            element={
+              <ProtectedRoute needAuth={false}>
+                <SignIn />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <ProtectedRoute needAuth={false}>
+                <SignUp />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
       </div>
     </ThemeProvider>
   );
