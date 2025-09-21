@@ -2,14 +2,25 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { API_KEY } from "../../data";
 
-// Feed Component
-const Feed = ({ category, searchQuery, isSearch }) => {
+const Feed = ({
+  category,
+  searchQuery,
+  isSearch,
+  currentPage,
+  onTotalPagesChange,
+}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [nextPageToken, setNextPageToken] = useState("");
+  const [prevPageTokens, setPrevPageTokens] = useState([]);
 
-  const fetchData = async () => {
+  // Constants for pagination
+  const VIDEOS_PER_PAGE = 12;
+  const TOTAL_VIDEOS_ESTIMATE = 1000; 
+
+  const fetchData = async (pageToken = "") => {
     setLoading(true);
     setError(null);
     try {
@@ -20,9 +31,17 @@ const Feed = ({ category, searchQuery, isSearch }) => {
         url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&q=${encodeURIComponent(
           searchQuery
         )}&type=video&key=${API_KEY}`;
+
+        if (pageToken) {
+          url += `&pageToken=${pageToken}`;
+        }
       } else {
         // Category API
         url = `https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&chart=mostPopular&regionCode=US&maxResults=50&videoCategoryId=${category}&key=${API_KEY}`;
+
+        if (pageToken) {
+          url += `&pageToken=${pageToken}`;
+        }
       }
 
       const response = await fetch(url);
@@ -47,6 +66,13 @@ const Feed = ({ category, searchQuery, isSearch }) => {
       } else {
         setData(result.items || []);
       }
+
+      // Update pagination tokens
+      setNextPageToken(result.nextPageToken || "");
+
+      // Calculate total pages (estimate for YouTube API)
+      const totalPages = Math.ceil(TOTAL_VIDEOS_ESTIMATE / VIDEOS_PER_PAGE);
+      onTotalPagesChange(totalPages);
     } catch (error) {
       setError("Failed to fetch videos. Please try again later.");
       console.error("Error fetching videos:", error);
@@ -56,8 +82,37 @@ const Feed = ({ category, searchQuery, isSearch }) => {
   };
 
   useEffect(() => {
+    // Reset pagination when category or search query changes
+    setNextPageToken("");
+    setPrevPageTokens([]);
     fetchData();
   }, [category, searchQuery, isSearch]);
+
+  useEffect(() => {
+    // Handle page changes
+    if (currentPage === 1) {
+      // If we're on the first page, fetch initial data
+      if (prevPageTokens.length > 0) {
+        setNextPageToken("");
+        setPrevPageTokens([]);
+        fetchData();
+      }
+    } else {
+      // For subsequent pages, we need to handle pagination
+      // This is a simplified implementation since YouTube API doesn't support direct page access
+      // In a real app, you might want to cache previous pages or use a different approach
+      if (currentPage > prevPageTokens.length + 1 && nextPageToken) {
+        // Store current token and fetch next page
+        setPrevPageTokens([...prevPageTokens, nextPageToken]);
+        fetchData(nextPageToken);
+      } else if (currentPage <= prevPageTokens.length) {
+        // Go back to a previous page
+        // This would require caching previous pages or making additional API calls
+        // For simplicity, we'll just note that direct page access isn't supported
+        console.log("Direct page access not fully supported by YouTube API");
+      }
+    }
+  }, [currentPage]);
 
   // Format view count
   const formatViewCount = (count) => {
@@ -86,7 +141,7 @@ const Feed = ({ category, searchQuery, isSearch }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-        {[...Array(12)].map((_, i) => (
+        {[...Array(VIDEOS_PER_PAGE)].map((_, i) => (
           <div
             key={i}
             className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden"
@@ -124,38 +179,47 @@ const Feed = ({ category, searchQuery, isSearch }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-      {data.map((item) => (
-        <Link
-          to={{
-            pathname: `/video/${item.snippet.categoryId}/${item.id}`,
-            search: isSearch
-              ? `?search=${encodeURIComponent(searchQuery)}`
-              : "",
-          }}
-          className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
-          key={item.id}
-        >
-          <img
-            src={item.snippet.thumbnails.medium.url}
-            alt={item.snippet.title}
-            className="w-full h-40 object-cover"
-          />
-          <div className="p-3">
-            <h2 className="font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1">
-              {item.snippet.title}
-            </h2>
-            <h3 className="text-sm text-gray-600 dark:text-gray-300 mb-1">
-              {item.snippet.channelTitle}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {formatViewCount(item.statistics?.viewCount)} views •{" "}
-              {formatDate(item.snippet.publishedAt)}
-            </p>
-          </div>
-        </Link>
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+        {data.map((item) => (
+          <Link
+            to={{
+              pathname: `/video/${item.snippet.categoryId}/${item.id}`,
+              search: isSearch
+                ? `?search=${encodeURIComponent(searchQuery)}`
+                : "",
+            }}
+            className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+            key={item.id}
+          >
+            <img
+              src={item.snippet.thumbnails.medium.url}
+              alt={item.snippet.title}
+              className="w-full h-40 object-cover"
+            />
+            <div className="p-3">
+              <h2 className="font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1">
+                {item.snippet.title}
+              </h2>
+              <h3 className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+                {item.snippet.channelTitle}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {formatViewCount(item.statistics?.viewCount)} views •{" "}
+                {formatDate(item.snippet.publishedAt)}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Simple pagination indicator */}
+      <div className="flex justify-center items-center mt-4">
+        <div className="bg-red-500 px-4 py-2 rounded-lg">
+          <span className="text-sm text-white">Page {currentPage}</span>
+        </div>
+      </div>
+    </>
   );
 };
 
